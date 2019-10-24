@@ -1,0 +1,26 @@
+version: "3"
+
+services:
+  accountable-api:
+    container_name: accountable-api
+    image: node:10
+    volumes:
+      - .:/app
+    working_dir: /app
+    ports:
+      - "3005:3005"
+    command: /bin/bash -c 'yarn; yarn start;'
+    networks:
+      - accountable
+
+  accountable-db:
+    container_name: accountable-db
+    image: mongo
+    volumes:
+      - ./data-dev:/data/db
+    ports:
+      - 27017:27017
+    networks:
+      - accountable
+networks:
+  accountable:

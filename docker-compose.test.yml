@@ -1,0 +1,18 @@
+version: "3"
+
+networks:
+  net_hyperledger:
+    external: true
+
+services:
+  api:
+    container_name: api
+    image: node:10
+    volumes:
+      - .:/app
+    working_dir: /app
+    ports:
+      - "3005:3005"
+    command: /bin/bash -c 'yarn; yarn test;'
+    networks:
+      - net_hyperledger

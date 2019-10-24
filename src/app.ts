@@ -1,0 +1,51 @@
+import * as express from "express";
+import * as bodyParser from "body-parser";
+import * as helmet from "helmet";
+import { injectable } from "inversify";
+import * as promBundle from "express-prom-bundle";
+import {
+  MainRouter,
+  InhabitantRouter,
+  SwaggerRouter
+} from "./routers";
+
+@injectable()
+export class App {
+  private _app: express.Application;
+
+  constructor(
+    private mainRouter: MainRouter,
+    private inhabitantRouter: InhabitantRouter,
+    private swaggerRouter: SwaggerRouter
+  ) {
+    this._app = express();
+    this.config();
+  }
+
+  public get app(): express.Application {
+    return this._app;
+  }
+
+  private config(): void {
+    const metricsMiddleware = promBundle({
+      includeMethod: true,
+      includePath: true
+    });
+    this._app.use(metricsMiddleware);
+
+    // support application/json
+    this._app.use(bodyParser.json());
+    // helmet security
+    this._app.use(helmet());
+    //support application/x-www-form-urlencoded post data
+    this._app.use(bodyParser.urlencoded({ extended: false }));
+    //Initialize app routes
+    this._initRoutes();
+  }
+
+  private _initRoutes() {
+    this._app.use("/api", this.mainRouter.router);
+    this._app.use("/api/inhabitant", this.inhabitantRouter.router);
+    this._app.use("/api/docs", this.swaggerRouter.router);
+  }
+}
