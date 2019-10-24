@@ -1,14 +1,15 @@
 import { LoggerService } from "../services";
 import { Request, Response } from "express";
 import { injectable } from "inversify";
-import { InhabitantStorage } from "../storages";
-import { Inhabitant } from "../models";
+import { InhabitantStorage, OfferStorage } from "../storages";
+import { Inhabitant, Offer } from "../models";
 
 @injectable()
 export class InhabitantController {
   constructor(
     private loggerService: LoggerService,
-    private inhabitantStorage: InhabitantStorage
+    private inhabitantStorage: InhabitantStorage,
+    private offerStorage: OfferStorage
   ) { }
 
   /**
@@ -21,7 +22,7 @@ export class InhabitantController {
    *            type: Inhabitant
    *            in: body
    *            schema:
-   *               $ref: '#/definitions/CreateInhabitantModel'
+   *               $ref: '#/definitions/Inhabitant'
    *      tags:
    *          - Inhabitant
    *      produces:
@@ -50,6 +51,24 @@ export class InhabitantController {
       this.loggerService.error(err);
       res.status(500).send({ error: "Something went wrong, please try again later." });
     }
+  }
+
+  // POST inhabitants/id/offer
+  public placeOffer = async (req: Request, res: Response) => {
+    const offer: Offer = req.body;
+    if (!offer) {
+      this.loggerService.error(`[placeOffer] Invalid payload.`);
+      return res.status(400).send({ error: "Invalid payload!" });
+    }
+
+    try {
+      const newOffer = await this.offerStorage.create(offer);
+      return res.status(201).send({ id: newOffer.id });
+    } catch (err) {
+      this.loggerService.error(err);
+      res.status(500).send({ error: "Something went wrong, please try again later." });
+    }    
+
   }
 }
 
