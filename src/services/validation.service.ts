@@ -14,7 +14,7 @@ export class ValidationService {
     }
 
     public async validateSell(seller: Inhabitant, offer: Offer): Promise<ResponseModel> {
-        const sellerHistory = await this.transactionStorage.getBySellerId(seller.uuid, 3); 
+        const sellerHistory = await this.transactionStorage.getBySellerId(seller.id, 3); 
         if(sellerHistory.length === 3 && sellerHistory.every((elem, index, arr) => elem.goods === "book")) {
             return {
                 status: 400, 
@@ -53,7 +53,7 @@ export class ValidationService {
             };
         }
         
-        const buyerHistory = await this.transactionStorage.getByBuyerId(buyer.uuid, 2);
+        const buyerHistory = await this.transactionStorage.getByBuyerId(buyer.id, 2);
         if(buyerHistory.length === 2 && buyerHistory.every((elem, index, arr) => elem.goods === "bike")) {
             return {
                 status: 400, 

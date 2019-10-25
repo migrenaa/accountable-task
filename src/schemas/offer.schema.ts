@@ -1,13 +1,16 @@
 import { model, Model, Schema, Document } from "mongoose";
 import { Offer } from "../models";
+import { v4 as uuid } from "uuid";
 
 export interface OfferModel extends Offer, Document { }
 
 const offerSchema: Schema = new Schema({
-    uuid: {
+    id: {
         type: String,
         required: true,
         unique: true,
+        default: uuid()
+
     },   
     userId: {
         type: String,

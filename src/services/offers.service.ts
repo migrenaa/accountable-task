@@ -20,6 +20,13 @@ export class OfferService {
 
     public async trande(userId: string, offerId: string): Promise<ResponseModel> {
         const offer = await this.offerStorage.getByID(offerId);
+
+        if(userId === offer.userId) {
+            return {
+                status: 400,
+                message: "A user can't accept it's own offers."
+            }
+        }
         let buyerId: string; 
         let sellerId: string;
         if(offer.type === OfferType.Buy) {
@@ -32,12 +39,12 @@ export class OfferService {
         const buyer = await this.inhabitantStorage.getByID(buyerId);
         const seller = await this.inhabitantStorage.getByID(sellerId);
 
-        this.logger.info(`Validating buyer ${buyerId} for offer ${offer.uuid}`);
+        this.logger.info(`Validating buyer ${buyerId} for offer ${offer.id}`);
         const buyerValidation = await this.validationService.validateBuy(buyer, offer);
         if(buyerValidation.status !== 200) {
             return buyerValidation;
         }
-        this.logger.info(`Validating seller ${sellerId} for offer ${offer.uuid}`);
+        this.logger.info(`Validating seller ${sellerId} for offer ${offer.id}`);
         const sellerValidation = await this.validationService.validateSell(seller, offer);
         if(sellerValidation.status !== 200) {
             return sellerValidation;
@@ -52,9 +59,9 @@ export class OfferService {
         }
     }
 
-    public async exchangeGoods(seller: Inhabitant, buyer: Inhabitant, offer: Offer) {
-        
-        this.logger.info(`[exchangeGoods] Executing offer ${offer.uuid}`);
+    public async exchangeGoods(seller: Inhabitant, buyer: Inhabitant, offer: Offer): Promise<void> {
+
+        this.logger.info(`[exchangeGoods] Executing offer ${offer.id}`);
         seller.belongings[offer.goods] = Number(seller.belongings[offer.goods]) - Number(offer.amount);
         seller.moneyAmount = (Number(seller.moneyAmount) + Number(offer.price)).toString();
 
@@ -62,11 +69,11 @@ export class OfferService {
         buyer.moneyAmount = (Number(buyer.moneyAmount) - Number(offer.price)).toString();
 
 
-        this.logger.info(`[exchangeGoods] Updating seller belongings ${offer.uuid}`);
+        this.logger.info(`[exchangeGoods] Updating seller belongings ${offer.id}`);
         this.inhabitantStorage.update(seller);
-        this.logger.info(`[exchangeGoods] Updating buyer belongings ${offer.uuid}`);
+        this.logger.info(`[exchangeGoods] Updating buyer belongings ${offer.id}`);
         this.inhabitantStorage.update(buyer);
-        this.logger.info(`[exchangeGoods] Successfully exchanged the items for offer: ${offer.uuid}`);
+        this.logger.info(`[exchangeGoods] Successfully exchanged the items for offer: ${offer.id}`);
 
     }
 }

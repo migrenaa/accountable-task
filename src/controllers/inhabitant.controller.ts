@@ -47,7 +47,7 @@ export class InhabitantController {
 
     try {
       const newInhabitant = await this.inhabitantStorage.create(inhabitant);
-      return res.status(201).send({ id: newInhabitant.uuid });
+      return res.status(201).send({ id: newInhabitant.id });
     } catch (err) {
       this.loggerService.error(err);
       res.status(500).send({ error: "Something went wrong, please try again later." });
@@ -87,7 +87,7 @@ export class InhabitantController {
 
     try {
       const newOffer = await this.offerStorage.create(offer);
-      return res.status(201).send({ id: newOffer.uuid });
+      return res.status(201).send({ id: newOffer.id });
     } catch (err) {
       this.loggerService.error(err);
       res.status(500).send({ error: "Something went wrong, please try again later." });

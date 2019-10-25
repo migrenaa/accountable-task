@@ -29,7 +29,7 @@ import { Goods } from "./goods";
  *              type: string
  */
 export interface Offer {
-    uuid: string;
+    id: string;
     userId: string;
     goods: Goods;
     type: OfferType;

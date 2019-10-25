@@ -1,13 +1,15 @@
 import { model, Model, Schema, Document } from "mongoose";
 import { Transaction } from "../models";
+import { v4 as uuid } from "uuid";
 
 export interface TransactionModel extends Transaction, Document { }
 
 const transactionSchema: Schema = new Schema({
-    uuid: {
+    id: {
         type: String,
         required: true,
         unique: true,
+        default: uuid()
     },
     buyerId: {
         type: String,

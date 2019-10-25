@@ -27,6 +27,7 @@
  *              type: string
  */
 export interface Transaction {
+    id: string;
     buyerId: string;
     sellerId: string;
     buyerName: string;

@@ -1,4 +1,3 @@
-import * as mongoose from "mongoose";
 import { TransactionSchema } from "../schemas";
 import { LoggerService } from "../services";
 import { Transaction } from "../models";
@@ -6,24 +5,9 @@ import { injectable } from "inversify";
 import { v4 as uuid } from "uuid";
 
 
-// Mongoose bug - it is using mpromise, if it's not specified
-(<any>mongoose).Promise = global.Promise;
-
 @injectable()
 export class TransactionStorage {
   constructor(private logger: LoggerService) {
-    this.initDbConnection(process.env.MONGODB_CONNECTION_STRING);
-  }
-
-  protected initDbConnection(connectionString: string): void {
-    mongoose.connect(connectionString, { useNewUrlParser: true }, (err: any) => {
-      if (err) {
-        throw err;
-      } else {
-        this.logger.info("Mongoose connection established!");
-      }
-    });
-    this.logger.info("MongoDB service init");
   }
 
   // use async await
@@ -32,6 +16,7 @@ export class TransactionStorage {
 
     try {
       const newTransaction = new TransactionSchema(transaction);
+      // newTransaction.id = uuid();
       const transactionSaved = newTransaction.save();
       result = transactionSaved;
     } catch (error) {

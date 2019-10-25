@@ -13,14 +13,14 @@ export class TaxesService {
 
     public async applyTaxes(seller: Inhabitant, buyer: Inhabitant, offer: Offer) {
 
-        this.logger.info(`Applying taxes for offer ${offer.uuid}`);
+        this.logger.info(`Applying taxes for offer ${offer.id}`);
 
         buyer.moneyAmount = (Number(buyer.moneyAmount) - await this.calculateBuyTax(buyer, offer)).toString();
-        this.logger.info(`Updating buyer ${buyer.uuid} money amount with ${buyer.moneyAmount}`);
+        this.logger.info(`Updating buyer ${buyer.id} money amount with ${buyer.moneyAmount}`);
         await this.inhabitantStorage.update(buyer);
 
         seller.moneyAmount = (Number(seller.moneyAmount) - await this.calculateSellTax(seller, offer)).toString();
-        this.logger.info(`Updating seller ${seller.uuid} money amount with ${seller.moneyAmount}`);
+        this.logger.info(`Updating seller ${seller.id} money amount with ${seller.moneyAmount}`);
         await this.inhabitantStorage.update(seller);
 
         this.logger.info("Updating bank balance");

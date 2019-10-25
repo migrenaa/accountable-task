@@ -1,28 +1,13 @@
-import * as mongoose from "mongoose";
 import { OfferSchema } from "../schemas";
 import { LoggerService } from "../services";
 import { Offer } from "../models";
 import { injectable } from "inversify";
 import { v4 as uuid } from "uuid";
 
-// Mongoose bug - it is using mpromise, if it's not specified
-(<any>mongoose).Promise = global.Promise;
 
 @injectable()
 export class OfferStorage {
   constructor(private logger: LoggerService) {
-    this.initDbConnection(process.env.MONGODB_CONNECTION_STRING);
-  }
-
-  protected initDbConnection(connectionString: string): void {
-    mongoose.connect(connectionString, { useNewUrlParser: true }, (err: any) => {
-      if (err) {
-        throw err;
-      } else {
-        this.logger.info("Mongoose connection established!");
-      }
-    });
-    this.logger.info("MongoDB service init");
   }
 
   // use async await
@@ -31,6 +16,7 @@ export class OfferStorage {
 
     try {
       const newOffer = new OfferSchema(offer);
+      // newOffer.id = uuid();
       const offerSaved = newOffer.save();
       result = offerSaved;
     } catch (error) {
@@ -40,8 +26,8 @@ export class OfferStorage {
     return result;
   }
 
-  public async getByID(uuid: string): Promise<Offer> {
-    return this.getByFilter("uuid", uuid);
+  public async getByID(id: string): Promise<Offer> {
+    return this.getByFilter("id", id);
   }
 
   public async getByFilter(filterProperty: string, filterValue: string): Promise<Offer> {
@@ -75,19 +61,22 @@ export class OfferStorage {
 
   public async closeOffer(offer: Offer): Promise<Offer> {
     try {
-        return await OfferSchema.findOneAndUpdate(
-            {
-                id: offer.uuid
-            },
-            {
-                $set: {
-                  isOpen: false
-                }
-            }
-        ).exec();
+      return await OfferSchema.findOneAndUpdate(
+        {
+          id: offer.id
+        },
+        {
+          $set: {
+            isOpen: false,
+          }
+        },
+        {
+          new: true
+        }
+      ).exec();
     } catch (error) {
-        this.logger.error(`Could not update offer ${offer.uuid}. Error: ${error}`);
-        throw error;
+      this.logger.error(`Could not update offer ${offer.id}. Error: ${error}`);
+      throw error;
     }
-}
+  }
 }
