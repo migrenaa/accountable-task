@@ -1,15 +1,13 @@
 import { model, Model, Schema, Document } from "mongoose";
 import { Inhabitant } from "../models";
-import { v4 as uuid } from "uuid";
 
 export interface InhabitantModel extends Inhabitant, Document { }
 
 const inhabitantSchema: Schema = new Schema({
-    id: {
+    uuid: {
         type: String,
         required: true,
         unique: true,
-        default: uuid()
     },   
     name: {
         type: String,

@@ -35,7 +35,7 @@ export interface CreateInhabitantModel {
  *              $ref: '#/definitions/Belongings'
  */
 export interface Inhabitant {
-    id: string;
+    uuid: string;
     name: string;
     moneyAmount: string; //use big numbers
     belongings: Belongings;

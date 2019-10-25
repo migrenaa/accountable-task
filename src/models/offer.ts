@@ -1,3 +1,5 @@
+import { OfferType } from "./offerType";
+import { Goods } from "./goods";
 
 
 /**
@@ -27,10 +29,10 @@
  *              type: string
  */
 export interface Offer {
-    id: string;
+    uuid: string;
     userId: string;
-    goods: string;
-    type: string;
+    goods: Goods;
+    type: OfferType;
     price: string;
     amount: string;
     datePlaced: string;

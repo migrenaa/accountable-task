@@ -3,6 +3,8 @@ import { TransactionSchema } from "../schemas";
 import { LoggerService } from "../services";
 import { Transaction } from "../models";
 import { injectable } from "inversify";
+import { v4 as uuid } from "uuid";
+
 
 // Mongoose bug - it is using mpromise, if it's not specified
 (<any>mongoose).Promise = global.Promise;

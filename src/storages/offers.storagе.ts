@@ -3,6 +3,7 @@ import { OfferSchema } from "../schemas";
 import { LoggerService } from "../services";
 import { Offer } from "../models";
 import { injectable } from "inversify";
+import { v4 as uuid } from "uuid";
 
 // Mongoose bug - it is using mpromise, if it's not specified
 (<any>mongoose).Promise = global.Promise;
@@ -39,8 +40,8 @@ export class OfferStorage {
     return result;
   }
 
-  public async getByID(id: string): Promise<Offer> {
-    return this.getByFilter("id", id);
+  public async getByID(uuid: string): Promise<Offer> {
+    return this.getByFilter("uuid", uuid);
   }
 
   public async getByFilter(filterProperty: string, filterValue: string): Promise<Offer> {
@@ -72,13 +73,21 @@ export class OfferStorage {
     return result;
   }
 
-  public async deleteAll(): Promise<void> {
+  public async closeOffer(offer: Offer): Promise<Offer> {
     try {
-      await OfferSchema.deleteMany({}).exec();
-    } catch (err) {
-      throw new Error(
-        "couldn't remove all providers from provider storage: " + JSON.stringify(err)
-      );
+        return await OfferSchema.findOneAndUpdate(
+            {
+                id: offer.uuid
+            },
+            {
+                $set: {
+                  isOpen: false
+                }
+            }
+        ).exec();
+    } catch (error) {
+        this.logger.error(`Could not update offer ${offer.uuid}. Error: ${error}`);
+        throw error;
     }
-  }
+}
 }

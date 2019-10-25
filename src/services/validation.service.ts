@@ -1,12 +1,7 @@
 import { LoggerService } from "../services";
 import { injectable } from "inversify";
-import { InhabitantStorage, OfferStorage, TransactionStorage } from "../storages";
-import { Offer } from "../models";
-
-export class ResponseModel {
-    status: number;
-    message: string;
-};
+import { Offer, ResponseModel, Inhabitant, Goods } from "../models";
+import { OfferStorage, TransactionStorage } from "../storages";
 
 
 @injectable()
@@ -14,13 +9,12 @@ export class ValidationService {
     constructor(
         private logger: LoggerService,
         private offerStorage: OfferStorage,
-        private inhabitantStorage: InhabitantStorage,
-        private transactionStorage: TransactionStorage) {
+        private transactionStorage: TransactionStorage
+        ) {
     }
 
-    public async validateSell(offer: Offer): Promise<ResponseModel> {
-
-        const sellerHistory = await this.transactionStorage.getBySellerId(offer.userId, 3); 
+    public async validateSell(seller: Inhabitant, offer: Offer): Promise<ResponseModel> {
+        const sellerHistory = await this.transactionStorage.getBySellerId(seller.uuid, 3); 
         if(sellerHistory.length === 3 && sellerHistory.every((elem, index, arr) => elem.goods === "book")) {
             return {
                 status: 400, 
@@ -31,21 +25,20 @@ export class ValidationService {
         try{
             await this.offerStorage.create(offer);
             return {
-                status: 201, 
+                status: 200, 
                 message: "Offer has been placed."
             }; 
         } catch(err) {
-            this.logger.error("Couldn't place an offer");
+            this.logger.error(`Couldn't place an offer due to error: ${err}`);
             return {
                 status: 500,
-                message: "Couln't place an offer. Try again later.";
+                message: "Couln't place an offer. Try again later."
             }
         }
     }
 
-    public async validateBuy(offer: Offer): Promise<ResponseModel> {
-        const buyer = await this.inhabitantStorage.getByID(offer.id);
-        if(offer.goods === "bike" && buyer.belongings.bikes === 2) {
+    public async validateBuy(buyer: Inhabitant, offer: Offer): Promise<ResponseModel> {
+        if(offer.goods === Goods.Bikes && buyer.belongings.bikes === 2) {
             return {
                 status: 400, 
                 message: "The buyer can't buy a third bike."
@@ -60,12 +53,17 @@ export class ValidationService {
             };
         }
         
-        const buyerHistory = await this.transactionStorage.getByBuyerId(offer.userId, 2);
+        const buyerHistory = await this.transactionStorage.getByBuyerId(buyer.uuid, 2);
         if(buyerHistory.length === 2 && buyerHistory.every((elem, index, arr) => elem.goods === "bike")) {
             return {
                 status: 400, 
                 message: "The buyer can't place an offer for bike 2 times in a row."
             };
         };
+
+        return {
+            status:200, 
+            message: "The offer is valid."
+        }
     }
 }

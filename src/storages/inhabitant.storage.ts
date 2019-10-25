@@ -1,8 +1,10 @@
 import * as mongoose from "mongoose";
 import { InhabitantSchema } from "../schemas/inhabitant.schema";
 import { LoggerService } from "../services";
-import { Inhabitant, CreateInhabitantModel } from "../models";
+import { Inhabitant } from "../models";
 import { injectable } from "inversify";
+import { v4 as uuid } from "uuid";
+
 
 // Mongoose bug - it is using mpromise, if it's not specified
 (<any>mongoose).Promise = global.Promise;
@@ -41,8 +43,33 @@ export class InhabitantStorage {
     return result;
   }
 
-  public async getByID(id: string): Promise<Inhabitant> {
-    return this.getByFilter("id", id);
+  
+  public async update(inhabitant: Inhabitant): Promise<Inhabitant> {
+    try {
+        return await InhabitantSchema.findOneAndUpdate(
+            {
+                id: inhabitant.uuid
+            },
+            {
+                $set: {
+
+                    name: inhabitant.name,
+                    moneyAmount: inhabitant.moneyAmount,
+                    belongings: inhabitant.belongings
+                }
+            },
+            {
+                new: true
+            }
+        ).exec();
+    } catch (error) {
+        this.logger.error(`Could not update inhabitant ${inhabitant.uuid}. Error: ${error}`);
+        throw error;
+    }
+}
+
+  public async getByID(uuid: string): Promise<Inhabitant> {
+    return this.getByFilter("uuid", uuid);
   }
 
   public async getByFilter(filterProperty: string, filterValue: string): Promise<Inhabitant> {
