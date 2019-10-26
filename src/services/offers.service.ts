@@ -15,21 +15,21 @@ export class OfferService {
         private inhabitantStorage: InhabitantStorage,
         private validationService: ValidationService,
         private taxesService: TaxesService
-        ) {
+    ) {
     }
 
     public async trande(userId: string, offerId: string): Promise<ResponseModel> {
         const offer = await this.offerStorage.getByID(offerId);
 
-        if(userId === offer.userId) {
+        if (userId === offer.userId) {
             return {
                 status: 400,
                 message: "A user can't accept it's own offers."
             }
         }
-        let buyerId: string; 
+        let buyerId: string;
         let sellerId: string;
-        if(offer.type === OfferType.Buy) {
+        if (offer.type === OfferType.Buy) {
             buyerId = offer.userId;
             sellerId = userId;
         } else {
@@ -41,12 +41,12 @@ export class OfferService {
 
         this.logger.info(`Validating buyer ${buyerId} for offer ${offer.id}`);
         const buyerValidation = await this.validationService.validateBuy(buyer, offer);
-        if(buyerValidation.status !== 200) {
+        if (buyerValidation.status !== 200) {
             return buyerValidation;
         }
         this.logger.info(`Validating seller ${sellerId} for offer ${offer.id}`);
         const sellerValidation = await this.validationService.validateSell(seller, offer);
-        if(sellerValidation.status !== 200) {
+        if (sellerValidation.status !== 200) {
             return sellerValidation;
         }
 
@@ -54,7 +54,7 @@ export class OfferService {
         await this.exchangeGoods(seller, buyer, offer);
         await this.offerStorage.closeOffer(offer);
         return {
-            status: 200, 
+            status: 200,
             message: "The trade passed successfully."
         }
     }
@@ -74,6 +74,20 @@ export class OfferService {
         this.logger.info(`[exchangeGoods] Updating buyer belongings ${offer.id}`);
         this.inhabitantStorage.update(buyer);
         this.logger.info(`[exchangeGoods] Successfully exchanged the items for offer: ${offer.id}`);
+    }
 
+    public async placeOffer(offer: Offer): Promise<ResponseModel> {
+        const inhabitant = await this.inhabitantStorage.getByID(offer.userId);
+        const validationResult = OfferType.Buy
+            ? await this.validationService.validateBuy(inhabitant, offer)
+            : await this.validationService.validateSell(inhabitant, offer);
+        if(validationResult.status !== 200) {
+            return validationResult;
+        }
+        await this.offerStorage.create(offer);
+        return {
+            status: 200, 
+            message: "Offer placed"
+        };
     }
 }

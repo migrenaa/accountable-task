@@ -1,7 +1,7 @@
 import { LoggerService, OfferService } from "../services";
 import { Request, Response } from "express";
 import { injectable } from "inversify";
-import { InhabitantStorage, OfferStorage } from "../storages";
+import { InhabitantStorage } from "../storages";
 import { Inhabitant, Offer } from "../models";
 
 @injectable()
@@ -9,7 +9,6 @@ export class InhabitantController {
   constructor(
     private loggerService: LoggerService,
     private inhabitantStorage: InhabitantStorage,
-    private offerStorage: OfferStorage,
     private offerService: OfferService
   ) { }
 
@@ -86,8 +85,8 @@ export class InhabitantController {
     }
 
     try {
-      const newOffer = await this.offerStorage.create(offer);
-      return res.status(201).send({ id: newOffer.id });
+      const response = await this.offerService.placeOffer(offer);
+      return res.status(response.status).send({ message: "Offer placed" });
     } catch (err) {
       this.loggerService.error(err);
       res.status(500).send({ error: "Something went wrong, please try again later." });
@@ -126,11 +125,11 @@ export class InhabitantController {
 
     try {
       const response = await this.offerService.trande(inhabitantId, offerId);
-      return res.status(200).send(response);
+      return res.status(response.status).send({ message: response.message });
     } catch (err) {
       this.loggerService.error(err);
       res.status(500).send({ error: "Something went wrong, please try again later." });
-    }    
+    }
   }
 }
 

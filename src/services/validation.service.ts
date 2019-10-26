@@ -14,13 +14,19 @@ export class ValidationService {
     }
 
     public async validateSell(seller: Inhabitant, offer: Offer): Promise<ResponseModel> {
-        const sellerHistory = await this.transactionStorage.getBySellerId(seller.id, 3); 
+        if(seller.belongings[offer.goods] < offer.amount) {
+            return {
+                status: 400, 
+                message: "The wants to sell more than it has from this products."
+            };
+        };
+        const sellerHistory = await this.transactionStorage.getBySellerId(seller.id, 3);
         if(sellerHistory.length === 3 && sellerHistory.every((elem, index, arr) => elem.goods === "book")) {
             return {
                 status: 400, 
                 message: "The seller can't place an offer for book 3 times in a row."
             };
-        };
+        }
 
         try{
             await this.offerStorage.create(offer);
@@ -38,6 +44,12 @@ export class ValidationService {
     }
 
     public async validateBuy(buyer: Inhabitant, offer: Offer): Promise<ResponseModel> {
+        if(Number(buyer.moneyAmount) < offer.amount * Number(offer.price)) {
+            return {
+                status: 400,
+                message: "The buyer doesn't have enough money."
+            };
+        }
         if(offer.goods === Goods.Bikes && buyer.belongings.bikes === 2) {
             return {
                 status: 400, 

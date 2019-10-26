@@ -22,7 +22,7 @@ import { Goods } from "./goods";
  *            type:
  *              type: string
  *            amount:
- *              type: string
+ *              type: number
  *            datePlaced:
  *              type: string
  *            price: 
@@ -34,6 +34,6 @@ export interface Offer {
     goods: Goods;
     type: OfferType;
     price: string;
-    amount: string;
+    amount: number;
     datePlaced: string;
 }
