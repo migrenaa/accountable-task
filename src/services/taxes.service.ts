@@ -1,5 +1,5 @@
 import { LoggerService } from "../services";
-import { InhabitantStorage } from "../storages";
+import { InhabitantStorage, GovermentBankAccountStorage } from "../storages";
 import { Offer, Inhabitant, Goods } from "../models";
 import { injectable } from "inversify";
 
@@ -8,23 +8,28 @@ export class TaxesService {
 
     constructor(
         private logger: LoggerService,
-        private inhabitantStorage: InhabitantStorage) {
+        private inhabitantStorage: InhabitantStorage,
+        private bankStorage: GovermentBankAccountStorage) {
     }
 
     public async applyTaxes(seller: Inhabitant, buyer: Inhabitant, offer: Offer) {
 
         this.logger.info(`Applying taxes for offer ${offer.id}`);
 
-        buyer.moneyAmount = (Number(buyer.moneyAmount) - await this.calculateBuyTax(buyer, offer)).toString();
+        const buyerTaxes = await this.calculateBuyTax(buyer, offer);
+        const sellerTaxes = await this.calculateBuyTax(seller, offer);
+        buyer.moneyAmount = (Number(buyer.moneyAmount) - buyerTaxes).toString();
         this.logger.info(`Updating buyer ${buyer.id} money amount with ${buyer.moneyAmount}`);
         await this.inhabitantStorage.update(buyer);
 
-        seller.moneyAmount = (Number(seller.moneyAmount) - await this.calculateSellTax(seller, offer)).toString();
+        seller.moneyAmount = (Number(seller.moneyAmount) - sellerTaxes).toString();
         this.logger.info(`Updating seller ${seller.id} money amount with ${seller.moneyAmount}`);
         await this.inhabitantStorage.update(seller);
 
         this.logger.info("Updating bank balance");
-        // await this.bankStorage.update(); 
+        const bankAccountAmount = await this.bankStorage.get();
+        const newAmount = Number(bankAccountAmount.amount) + sellerTaxes + buyerTaxes;
+        await this.bankStorage.updateAmount(newAmount.toString()); 
     }
 
     public async calculateSellTax(seller: Inhabitant, offer: Offer): Promise<number> {
