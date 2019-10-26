@@ -12,12 +12,13 @@ const offerSchema: Schema = new Schema({
         default: uuid()
 
     },   
-    userId: {
+    inhabitantId: {
         type: String,
         required: true,
     },   
-    goods: {
+    productType: {
         type: String,
+        enum: ["books", "bikes", "coal", "cheese"],
         required: true
     },
     type: {

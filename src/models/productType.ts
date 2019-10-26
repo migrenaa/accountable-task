@@ -1,6 +1,7 @@
-export enum Goods {
+
+export enum ProductType {
     Books = "books",
-    Coal = "coal",
     Bikes = "bikes",
+    Coal = "coal", 
     Cheese = "cheese"
 }

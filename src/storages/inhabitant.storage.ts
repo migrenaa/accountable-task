@@ -35,8 +35,8 @@ export class InhabitantStorage {
             {
                 $set: {
                     name: inhabitant.name,
-                    moneyAmount: inhabitant.moneyAmount,
-                    belongings: inhabitant.belongings
+                    balance: inhabitant.balance,
+                    products: inhabitant.products
                 }
             },
             {

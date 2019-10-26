@@ -5,16 +5,16 @@
  *      type: object
  *      required:
  *          - name
- *          - moneyAmount
+ *          - balance
  *      properties:
  *            name:
  *              type: string
- *            moneyAmount:
+ *            balance:
  *              type: string
  */
 export interface CreateInhabitantModel {
     name: string;
-    moneyAmount: string;
+    balance: string;
 }
 
 /**
@@ -24,12 +24,12 @@ export interface CreateInhabitantModel {
  *      type: object
  *      required:
  *          - name
- *          - moneyAmount
+ *          - balance
  *          - belongings
  *      properties:
  *            name:
  *              type: string
- *            moneyAmount:
+ *            balance:
  *              type: string
  *            belongings: 
  *              $ref: '#/definitions/Belongings'
@@ -37,15 +37,15 @@ export interface CreateInhabitantModel {
 export interface Inhabitant {
     id: string;
     name: string;
-    moneyAmount: string; //use big numbers
-    belongings: Belongings;
+    balance: string; //use big numbers
+    products: Products;
 }
 
 
 /**
  * @swagger
  * definitions:
- *  Belongings:
+ *  Products:
  *      type: object
  *      required:
  *          - bikes
@@ -62,7 +62,7 @@ export interface Inhabitant {
  *            books:
  *              type: number
  */
-export interface Belongings {
+export interface Products {
     bikes: number;
     coal: number;
     cheese: number;

@@ -27,8 +27,9 @@ const transactionSchema: Schema = new Schema({
         type: String,
         required: true,
     },   
-    goods: {
+    productType: {
         type: String,
+        enum: ["books", "bikes", "coal", "cheese"],
         required: true
     },
     price: { 

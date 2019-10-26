@@ -1,4 +1,4 @@
 export class GovermentBankAccount {
-    amount: string;
+    balance: string;
     dateUpdated: string;
 }
