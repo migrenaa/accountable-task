@@ -45,11 +45,12 @@ export class OfferStorage {
     return result;
   }
 
-  public async getAll(): Promise<Offer[]> {
+  public async getOpened(): Promise<Offer[]> {
     let result: Promise<Offer[]> = undefined;
 
     try {
-      const tmpres = await OfferSchema.find({}).exec();
+      const tmpres = await OfferSchema.find({isOpen: true}).exec();
+      console.log(tmpres);
       result = Promise.resolve(tmpres);
     } catch (error) {
       const errorMsg = `Error: ${error}`;
