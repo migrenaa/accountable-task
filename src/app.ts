@@ -4,9 +4,9 @@ import * as helmet from "helmet";
 import { injectable } from "inversify";
 import * as promBundle from "express-prom-bundle";
 import {
-  MainRouter,
   InhabitantRouter,
-  SwaggerRouter
+  SwaggerRouter,
+  OfferRouter
 } from "./routers";
 
 @injectable()
@@ -14,7 +14,7 @@ export class App {
   private _app: express.Application;
 
   constructor(
-    private mainRouter: MainRouter,
+    private offerRouter: OfferRouter,
     private inhabitantRouter: InhabitantRouter,
     private swaggerRouter: SwaggerRouter
   ) {
@@ -44,8 +44,8 @@ export class App {
   }
 
   private _initRoutes() {
-    this._app.use("/api", this.mainRouter.router);
     this._app.use("/api/inhabitant", this.inhabitantRouter.router);
+    this._app.use("/api/offer", this.offerRouter.router);
     this._app.use("/api/docs", this.swaggerRouter.router);
   }
 }

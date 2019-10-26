@@ -1,29 +1,12 @@
-import * as mongoose from "mongoose";
 import { InhabitantSchema } from "../schemas/inhabitant.schema";
 import { LoggerService } from "../services";
-import { Inhabitant, CreateInhabitantModel } from "../models";
+import { Inhabitant } from "../models";
 import { injectable } from "inversify";
-
-// Mongoose bug - it is using mpromise, if it's not specified
-(<any>mongoose).Promise = global.Promise;
-
-export class StorageExistsError extends Error {}
+import { v4 as uuid } from "uuid";
 
 @injectable()
 export class InhabitantStorage {
   constructor(private logger: LoggerService) {
-    this.initDbConnection(process.env.MONGODB_CONNECTION_STRING);
-  }
-
-  protected initDbConnection(connectionString: string): void {
-    mongoose.connect(connectionString, { useNewUrlParser: true }, (err: any) => {
-      if (err) {
-        throw err;
-      } else {
-        this.logger.info("Mongoose connection established!");
-      }
-    });
-    this.logger.info("MongoDB service init");
   }
 
   // use async await
@@ -32,6 +15,7 @@ export class InhabitantStorage {
 
     try {
       const newInhabitant = new InhabitantSchema(inhabitant);
+      newInhabitant.id = uuid();
       const inhabitantSaved = newInhabitant.save();
       result = inhabitantSaved;
     } catch (error) {
@@ -40,6 +24,30 @@ export class InhabitantStorage {
 
     return result;
   }
+
+  
+  public async update(inhabitant: Inhabitant): Promise<Inhabitant> {
+    try {
+        return await InhabitantSchema.findOneAndUpdate(
+            {
+                id: inhabitant.id
+            },
+            {
+                $set: {
+                    name: inhabitant.name,
+                    moneyAmount: inhabitant.moneyAmount,
+                    belongings: inhabitant.belongings
+                }
+            },
+            {
+                new: true
+            }
+        ).exec();
+    } catch (error) {
+        this.logger.error(`Could not update inhabitant ${inhabitant.id}. Error: ${error}`);
+        throw error;
+    }
+}
 
   public async getByID(id: string): Promise<Inhabitant> {
     return this.getByFilter("id", id);

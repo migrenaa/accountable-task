@@ -17,14 +17,51 @@ export interface CreateInhabitantModel {
     moneyAmount: string;
 }
 
-
+/**
+ * @swagger
+ * definitions:
+ *  Inhabitant:
+ *      type: object
+ *      required:
+ *          - name
+ *          - moneyAmount
+ *          - belongings
+ *      properties:
+ *            name:
+ *              type: string
+ *            moneyAmount:
+ *              type: string
+ *            belongings: 
+ *              $ref: '#/definitions/Belongings'
+ */
 export interface Inhabitant {
-    // id: string;
+    id: string;
     name: string;
     moneyAmount: string; //use big numbers
     belongings: Belongings;
 }
 
+
+/**
+ * @swagger
+ * definitions:
+ *  Belongings:
+ *      type: object
+ *      required:
+ *          - bikes
+ *          - coal
+ *          - cheese
+ *          - books
+ *      properties:
+ *            bikes:
+ *              type: number
+ *            coal:
+ *              type: number
+ *            cheese:
+ *              type: number
+ *            books:
+ *              type: number
+ */
 export interface Belongings {
     bikes: number;
     coal: number;
