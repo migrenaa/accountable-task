@@ -1,5 +1,5 @@
 import { OfferType } from "./offerType";
-import { Goods } from "./goods";
+import { ProductType } from "./productType";
 
 
 /**
@@ -8,16 +8,16 @@ import { Goods } from "./goods";
  *  Offer:
  *      type: object
  *      required:
- *          - userId
- *          - goods
+ *          - inhabitantId
+ *          - productType
  *          - type
  *          - amount
  *          - price
  *          - datePlaced
  *      properties:
- *            userId:
+ *            inhabitantId:
  *              type: string
- *            goods:
+ *            productType:
  *              type: string
  *            type:
  *              type: string
@@ -30,8 +30,8 @@ import { Goods } from "./goods";
  */
 export interface Offer {
     id: string;
-    userId: string;
-    goods: Goods;
+    inhabitantId: string;
+    productType: ProductType;
     type: OfferType;
     price: string;
     amount: number;

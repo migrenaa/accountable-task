@@ -15,7 +15,7 @@ const inhabitantSchema: Schema = new Schema({
         type: String,
         required: true
     },
-    moneyAmount: {
+    balance: {
         type: String,
         required: true
     },
@@ -23,7 +23,7 @@ const inhabitantSchema: Schema = new Schema({
         type: Date, 
         default: Date.now,
     },
-    belongings: {
+    products: {
         books: {
             type: Number,
             required: true,

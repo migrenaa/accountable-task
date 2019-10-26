@@ -1,31 +1,5 @@
+import { ProductType } from "./productType";
 
-
-/**
- * @swagger
- * definitions:
- *  Offer:
- *      type: object
- *      required:
- *          - userId
- *          - goods
- *          - type
- *          - amount
- *          - price
- *          - datePlaced
- *      properties:
- *            userId:
- *              type: string
- *            goods:
- *              type: string
- *            type:
- *              type: string
- *            amount:
- *              type: number
- *            datePlaced:
- *              type: string
- *            price: 
- *              type: string
- */
 export interface Transaction {
     id: string;
     buyerId: string;
@@ -33,7 +7,7 @@ export interface Transaction {
     buyerName: string;
     sellerName: string;
 
-    goods: string;
+    productType: ProductType;
     price: string;
     amount: number;
     datePlaced: string;

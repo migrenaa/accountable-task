@@ -19,7 +19,7 @@ export class GovermentBankAccountStorage {
         return;
       } else {
         bankAccount = {
-          amount: "0",
+          balance: "0",
           dateUpdated: undefined
         };
       }
