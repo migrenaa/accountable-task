@@ -34,7 +34,7 @@ export class GovermentBankAccountStorage {
   }
 
 
-  public async updateAmount(amount: string): Promise<void> {
+  public async updateBalance(balance: string): Promise<void> {
     try {
         return await GovermentBankAccountSchema.findOneAndUpdate(
             {
@@ -42,7 +42,7 @@ export class GovermentBankAccountStorage {
             },
             {
                 $set: {
-                    amount: amount
+                    balance: balance
                 }
             },
             {

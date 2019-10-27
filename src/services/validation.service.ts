@@ -2,7 +2,7 @@ import { LoggerService } from "../services";
 import { injectable } from "inversify";
 import { Offer, ResponseModel, Inhabitant, ProductType } from "../models";
 import { OfferStorage, TransactionStorage } from "../storages";
-
+import { Big } from "big.js";
 
 @injectable()
 export class ValidationService {
@@ -44,7 +44,7 @@ export class ValidationService {
     }
 
     public async validateBuy(buyer: Inhabitant, offer: Offer): Promise<ResponseModel> {
-        if(Number(buyer.balance) < offer.amount * Number(offer.price)) {
+        if(Big(buyer.balance).lt(Big(offer.amount).mul(offer.price))) {
             return {
                 status: 400,
                 message: "The buyer doesn't have enough money."
@@ -58,7 +58,7 @@ export class ValidationService {
         }
 
         if(offer.productType === "coal" && 
-            buyer.products.coal + Number(offer.amount) === Number(process.env.GLOBAL_COAL_MARKET) * 0.1) {
+            buyer.products.coal + offer.amount === Number(process.env.GLOBAL_COAL_MARKET) * 0.1) {
             return {
                 status: 400, 
                 message: "The buyer can't owe more than 10 percent of the global coal market."

@@ -5,6 +5,7 @@ import { ValidationService } from "./validation.service";
 import { TaxesService } from "./taxes.service";
 import { OfferStorage, InhabitantStorage } from "../storages";
 import { OfferType } from "../models";
+import { Big } from "big.js";
 
 @injectable()
 export class OfferService {
@@ -61,17 +62,16 @@ export class OfferService {
 
     public async exchangeProducts(seller: Inhabitant, buyer: Inhabitant, offer: Offer): Promise<void> {
 
-        this.logger.info(`[exchangeProducts] Executing offer ${offer.id}`);
-        seller.products[offer.productType] = Number(seller.products[offer.productType]) - Number(offer.amount);
-        seller.balance = (Number(seller.balance) + Number(offer.price)).toString();
+        this.logger.info(`[exchangeProducts] Executing offer ${offer.id}`);        
+        seller.products[offer.productType] = seller.products[offer.productType] - offer.amount;
+        seller.balance = Big(seller.balance).plus(offer.price).toString();
 
-        buyer.products[offer.productType] = Number(buyer.products[offer.productType]) + Number(offer.amount);
-        buyer.balance = (Number(buyer.balance) - Number(offer.price)).toString();
+        buyer.products[offer.productType] = buyer.products[offer.productType] + offer.amount;
+        buyer.balance = Big(buyer.balance).minus(offer.price).toString();
 
-
-        this.logger.info(`[exchangeProducts] Updating seller belongings ${offer.id}`);
+        this.logger.info(`[exchangeProducts] Updating seller products ${offer.id}`);
         this.inhabitantStorage.update(seller);
-        this.logger.info(`[exchangeProducts] Updating buyer belongings ${offer.id}`);
+        this.logger.info(`[exchangeProducts] Updating buyer products ${offer.id}`);
         this.inhabitantStorage.update(buyer);
         this.logger.info(`[exchangeProducts] Successfully exchanged the items for offer: ${offer.id}`);
     }
@@ -84,10 +84,13 @@ export class OfferService {
         if(validationResult.status !== 200) {
             return validationResult;
         }
-        await this.offerStorage.create(offer);
+        const created = await this.offerStorage.create(offer);
         return {
             status: 200, 
-            message: "Offer placed"
+            message: "Offer placed",
+            object: {
+                id: created.id
+            }
         };
     }
 }

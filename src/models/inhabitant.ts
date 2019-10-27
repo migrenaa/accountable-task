@@ -25,14 +25,14 @@ export interface CreateInhabitantModel {
  *      required:
  *          - name
  *          - balance
- *          - belongings
+ *          - products
  *      properties:
  *            name:
  *              type: string
  *            balance:
  *              type: string
- *            belongings: 
- *              $ref: '#/definitions/Belongings'
+ *            products: 
+ *              $ref: '#/definitions/Products'
  */
 export interface Inhabitant {
     id: string;
