@@ -4,7 +4,7 @@ import { GovermentBankAccount } from "../models";
 export interface GovermentBankAccountModel extends GovermentBankAccount, Document { }
 
 const govermentBankAccountSchema: Schema = new Schema({
-    amount: {
+    balance: {
         type: String,
         required: true,
         default: 0

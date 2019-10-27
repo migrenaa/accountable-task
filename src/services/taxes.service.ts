@@ -2,7 +2,7 @@ import { LoggerService } from "../services";
 import { InhabitantStorage, GovermentBankAccountStorage } from "../storages";
 import { Offer, Inhabitant, ProductType } from "../models";
 import { injectable } from "inversify";
-
+import { Big } from "big.js";
 @injectable()
 export class TaxesService {
 
@@ -18,27 +18,29 @@ export class TaxesService {
 
         const buyerTaxes = await this.calculateBuyTax(buyer, offer);
         const sellerTaxes = await this.calculateBuyTax(seller, offer);
-        buyer.balance = (Number(buyer.balance) - buyerTaxes).toString();
+        buyer.balance = Big(buyer.balance).minus(buyerTaxes).toString();
+
         this.logger.info(`Updating buyer ${buyer.id} balance with ${buyer.balance}`);
         await this.inhabitantStorage.update(buyer);
 
-        seller.balance = (Number(seller.balance) - sellerTaxes).toString();
+        seller.balance = Big(seller.balance).minus(sellerTaxes).toString();
         this.logger.info(`Updating seller ${seller.id} balance with ${seller.balance}`);
         await this.inhabitantStorage.update(seller);
 
         this.logger.info("Updating bank balance");
-        const bankAccountAmount = await this.bankStorage.get();
-        const newAmount = Number(bankAccountAmount.balance) + sellerTaxes + buyerTaxes;
-        await this.bankStorage.updateAmount(newAmount.toString()); 
+        const bankAccountBalance = await this.bankStorage.get();
+        this.logger.info(`Bank Account Balance: ${bankAccountBalance.balance}`);
+        const newBalance = Big(bankAccountBalance.balance).plus(sellerTaxes).plus(buyerTaxes);
+        await this.bankStorage.updateBalance(newBalance.toString());
     }
 
-    public async calculateSellTax(seller: Inhabitant, offer: Offer): Promise<number> {
+    public async calculateSellTax(seller: Inhabitant, offer: Offer): Promise<string> {
         const taxCalculation = this.getSellTax(offer.productType) - seller.products.bikes * 5
         const tax = taxCalculation > 0 ? taxCalculation : 0;
-        return Number(offer.amount) * tax / 100;
+        return Big(offer.amount).mul(tax).div(100).toString();
     }
 
-    public async calculateBuyTax(buyer: Inhabitant, offer: Offer): Promise<number> {
+    public async calculateBuyTax(buyer: Inhabitant, offer: Offer): Promise<string> {
 
         let taxPercent;
         taxPercent = this.getBuyTax(offer.productType);
@@ -46,11 +48,11 @@ export class TaxesService {
             const taxForHavingCoal = buyer.products.coal * 5;
             taxPercent = taxForHavingCoal < 50 ? taxForHavingCoal : 50;
         }
-        return Number(offer.amount) * taxPercent / 100;
+        return Big(offer.amount).mul(taxPercent).div(100).toString();
     }
 
     public getBuyTax(productType: ProductType): number {
-        
+
         this.logger.info(`Getting tax for buying ${ProductType}`);
         switch (productType) {
             case ProductType.Coal:
@@ -66,7 +68,7 @@ export class TaxesService {
     }
 
     public getSellTax(productType: ProductType): number {
-       
+
         this.logger.info(`Getting tax for selling ${ProductType}`);
         switch (productType) {
             case ProductType.Coal:
