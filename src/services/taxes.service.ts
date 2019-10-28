@@ -17,7 +17,7 @@ export class TaxesService {
         this.logger.info(`Applying taxes for offer ${offer.id}`);
 
         const buyerTaxes = await this.calculateBuyTax(buyer, offer);
-        const sellerTaxes = await this.calculateBuyTax(seller, offer);
+        const sellerTaxes = await this.calculateSellTax(seller, offer);
         buyer.balance = Big(buyer.balance).minus(buyerTaxes).toString();
 
         this.logger.info(`Updating buyer ${buyer.id} balance with ${buyer.balance}`);
@@ -34,13 +34,13 @@ export class TaxesService {
         await this.bankStorage.updateBalance(newBalance.toString());
     }
 
-    public async calculateSellTax(seller: Inhabitant, offer: Offer): Promise<string> {
+    private async calculateSellTax(seller: Inhabitant, offer: Offer): Promise<string> {
         const taxCalculation = this.getSellTax(offer.productType) - seller.products.bikes * 5
         const tax = taxCalculation > 0 ? taxCalculation : 0;
         return Big(offer.amount).mul(tax).div(100).toString();
     }
 
-    public async calculateBuyTax(buyer: Inhabitant, offer: Offer): Promise<string> {
+    private async calculateBuyTax(buyer: Inhabitant, offer: Offer): Promise<string> {
 
         let taxPercent;
         taxPercent = this.getBuyTax(offer.productType);
@@ -51,7 +51,7 @@ export class TaxesService {
         return Big(offer.amount).mul(taxPercent).div(100).toString();
     }
 
-    public getBuyTax(productType: ProductType): number {
+    private getBuyTax(productType: ProductType): number {
 
         this.logger.info(`Getting tax for buying ${ProductType}`);
         switch (productType) {
@@ -67,7 +67,7 @@ export class TaxesService {
         }
     }
 
-    public getSellTax(productType: ProductType): number {
+    private getSellTax(productType: ProductType): number {
 
         this.logger.info(`Getting tax for selling ${ProductType}`);
         switch (productType) {
