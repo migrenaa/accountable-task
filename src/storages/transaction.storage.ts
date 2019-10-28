@@ -7,7 +7,7 @@ import { v4 as uuid } from "uuid";
 
 @injectable()
 export class TransactionStorage {
-  constructor(private logger: LoggerService) {
+  constructor() {
   }
 
   // use async await
@@ -24,10 +24,6 @@ export class TransactionStorage {
     }
 
     return result;
-  }
-
-  public async getByID(id: string): Promise<Transaction> {
-    return this.getByFilter("id", id);
   }
 
   public async getByBuyerId(buyerId: string, limit: number): Promise<Transaction[]> {
@@ -55,44 +51,5 @@ export class TransactionStorage {
     }
 
     return result;
-  }
-
-  public async getByFilter(filterProperty: string, filterValue: string): Promise<Transaction> {
-    let result: Promise<Transaction> = undefined;
-
-    try {
-      const filter: any = {};
-      filter[filterProperty] = { $in: [filterValue] };
-      result = TransactionSchema.findOne(filter).exec();
-    } catch (error) {
-      const errorMsg = `Cannot obtain user ${filterValue}. Error: ${error}`;
-      result = Promise.reject(new Error(errorMsg));
-    }
-
-    return result;
-  }
-
-  public async getAll(): Promise<Transaction[]> {
-    let result: Promise<Transaction[]> = undefined;
-
-    try {
-      const tmpres = await TransactionSchema.find({}).exec();
-      result = Promise.resolve(tmpres);
-    } catch (error) {
-      const errorMsg = `Error: ${error}`;
-      result = Promise.reject(new Error(errorMsg));
-    }
-
-    return result;
-  }
-
-  public async deleteAll(): Promise<void> {
-    try {
-      await TransactionSchema.deleteMany({}).exec();
-    } catch (err) {
-      throw new Error(
-        "couldn't remove all providers from provider storage: " + JSON.stringify(err)
-      );
-    }
   }
 }
