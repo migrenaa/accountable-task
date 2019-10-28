@@ -1,9 +1,9 @@
-import { ResponseModel, Offer, Inhabitant } from "../models";
+import { ResponseModel, Offer, Inhabitant, Transaction } from "../models";
 import { injectable } from "inversify";
 import { LoggerService } from "./logger.service";
 import { ValidationService } from "./validation.service";
 import { TaxesService } from "./taxes.service";
-import { OfferStorage, InhabitantStorage } from "../storages";
+import { OfferStorage, InhabitantStorage, TransactionStorage } from "../storages";
 import { OfferType } from "../models";
 import { Big } from "big.js";
 
@@ -15,7 +15,8 @@ export class OfferService {
         private offerStorage: OfferStorage,
         private inhabitantStorage: InhabitantStorage,
         private validationService: ValidationService,
-        private taxesService: TaxesService
+        private taxesService: TaxesService,
+        private transactionStorage: TransactionStorage
     ) {
     }
 
@@ -54,6 +55,7 @@ export class OfferService {
         await this.taxesService.applyTaxes(seller, buyer, offer);
         await this.exchangeProducts(seller, buyer, offer);
         await this.offerStorage.closeOffer(offer);
+        await this.storeTransaction(seller, buyer, offer);
         return {
             status: 200,
             message: "The trade passed successfully."
@@ -65,12 +67,12 @@ export class OfferService {
         const validationResult = OfferType.Buy
             ? await this.validationService.validateBuy(inhabitant, offer)
             : await this.validationService.validateSell(inhabitant, offer);
-        if(validationResult.status !== 200) {
+        if (validationResult.status !== 200) {
             return validationResult;
         }
         const created = await this.offerStorage.create(offer);
         return {
-            status: 200, 
+            status: 200,
             message: "Offer placed",
             object: {
                 id: created.id
@@ -82,7 +84,7 @@ export class OfferService {
     // TODO move to helper class so that you can mock in the unit tests
     private async exchangeProducts(seller: Inhabitant, buyer: Inhabitant, offer: Offer): Promise<void> {
 
-        this.logger.info(`[exchangeProducts] Executing offer ${offer.id}`);        
+        this.logger.info(`[exchangeProducts] Executing offer ${offer.id}`);
         seller.products[offer.productType] = seller.products[offer.productType] - offer.amount;
         seller.balance = Big(seller.balance).plus(offer.price).toString();
 
@@ -94,5 +96,22 @@ export class OfferService {
         this.logger.info(`[exchangeProducts] Updating buyer products ${offer.id}`);
         this.inhabitantStorage.update(buyer);
         this.logger.info(`[exchangeProducts] Successfully exchanged the items for offer: ${offer.id}`);
+    }
+
+    private async storeTransaction(seller: Inhabitant, buyer: Inhabitant, offer: Offer): Promise<void> {
+        const transaction: Transaction = {
+            id: undefined,
+            buyerId: buyer.id,
+            buyerName: buyer.name,
+            sellerId: seller.id,
+            sellerName: seller.name,
+            productType: offer.productType,
+            price: offer.price,
+            datePlaced: offer.datePlaced,
+            amount: offer.amount,
+            dateTraded: Date.now().toString()
+        };
+
+        await this.transactionStorage.create(transaction);
     }
 }

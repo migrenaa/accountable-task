@@ -3,7 +3,7 @@ import * as typemoq from "typemoq";
 import { expect } from "chai";
 import "mocha";
 import { ValidationService, LoggerService, OfferService, TaxesService } from "../src/services";
-import { OfferStorage, InhabitantStorage } from "../src/storages";
+import { OfferStorage, InhabitantStorage, TransactionStorage } from "../src/storages";
 import { Offer, ProductType, Transaction, Inhabitant, ResponseModel } from "../src/models";
 import { v4 as uuid } from "uuid";
 import { Times } from "typemoq";
@@ -16,6 +16,7 @@ describe("OfferService", async () => {
     let validationSerivce: typemoq.IMock<ValidationService>;
     let taxesSerivce: typemoq.IMock<TaxesService>;
     let loggerService: typemoq.IMock<LoggerService>;
+    let transactionStorage: typemoq.IMock<TransactionStorage>
 
     before(async () => {
         offerStorage = typemoq.Mock.ofType<OfferStorage>();
@@ -23,13 +24,15 @@ describe("OfferService", async () => {
         validationSerivce = typemoq.Mock.ofType<ValidationService>();
         taxesSerivce = typemoq.Mock.ofType<TaxesService>();
         loggerService = typemoq.Mock.ofType<LoggerService>();
+        transactionStorage = typemoq.Mock.ofType<TransactionStorage>();
 
         offerService = new OfferService(
             loggerService.object,
             offerStorage.object,
             inhabitantStorage.object,
             validationSerivce.object,
-            taxesSerivce.object
+            taxesSerivce.object,
+            transactionStorage.object
         );
     });
 
