@@ -124,7 +124,7 @@ export class InhabitantController {
     const offerId = req.params.offerId;
 
     try {
-      const response = await this.offerService.trande(inhabitantId, offerId);
+      const response = await this.offerService.trade(inhabitantId, offerId);
       return res.status(response.status).send({ message: response.message });
     } catch (err) {
       this.loggerService.error(err);

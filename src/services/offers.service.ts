@@ -19,13 +19,13 @@ export class OfferService {
     ) {
     }
 
-    public async trande(inhabitantId: string, offerId: string): Promise<ResponseModel> {
+    public async trade(inhabitantId: string, offerId: string): Promise<ResponseModel> {
         const offer = await this.offerStorage.getByID(offerId);
 
         if (inhabitantId === offer.inhabitantId) {
             return {
                 status: 400,
-                message: "A user can't accept it's own offers."
+                message: "The inhabitant can't accept it's own offers."
             }
         }
         let buyerId: string;
@@ -60,22 +60,6 @@ export class OfferService {
         }
     }
 
-    public async exchangeProducts(seller: Inhabitant, buyer: Inhabitant, offer: Offer): Promise<void> {
-
-        this.logger.info(`[exchangeProducts] Executing offer ${offer.id}`);        
-        seller.products[offer.productType] = seller.products[offer.productType] - offer.amount;
-        seller.balance = Big(seller.balance).plus(offer.price).toString();
-
-        buyer.products[offer.productType] = buyer.products[offer.productType] + offer.amount;
-        buyer.balance = Big(buyer.balance).minus(offer.price).toString();
-
-        this.logger.info(`[exchangeProducts] Updating seller products ${offer.id}`);
-        this.inhabitantStorage.update(seller);
-        this.logger.info(`[exchangeProducts] Updating buyer products ${offer.id}`);
-        this.inhabitantStorage.update(buyer);
-        this.logger.info(`[exchangeProducts] Successfully exchanged the items for offer: ${offer.id}`);
-    }
-
     public async placeOffer(offer: Offer): Promise<ResponseModel> {
         const inhabitant = await this.inhabitantStorage.getByID(offer.inhabitantId);
         const validationResult = OfferType.Buy
@@ -92,5 +76,23 @@ export class OfferService {
                 id: created.id
             }
         };
+    }
+
+
+    // TODO move to helper class so that you can mock in the unit tests
+    private async exchangeProducts(seller: Inhabitant, buyer: Inhabitant, offer: Offer): Promise<void> {
+
+        this.logger.info(`[exchangeProducts] Executing offer ${offer.id}`);        
+        seller.products[offer.productType] = seller.products[offer.productType] - offer.amount;
+        seller.balance = Big(seller.balance).plus(offer.price).toString();
+
+        buyer.products[offer.productType] = buyer.products[offer.productType] + offer.amount;
+        buyer.balance = Big(buyer.balance).minus(offer.price).toString();
+
+        this.logger.info(`[exchangeProducts] Updating seller products ${offer.id}`);
+        this.inhabitantStorage.update(seller);
+        this.logger.info(`[exchangeProducts] Updating buyer products ${offer.id}`);
+        this.inhabitantStorage.update(buyer);
+        this.logger.info(`[exchangeProducts] Successfully exchanged the items for offer: ${offer.id}`);
     }
 }
