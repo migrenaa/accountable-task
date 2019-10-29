@@ -8,6 +8,7 @@ import {
   SwaggerRouter,
   OfferRouter
 } from "./routers";
+import { GovermentBankAccountRouter } from "./routers";
 
 @injectable()
 export class App {
@@ -16,6 +17,7 @@ export class App {
   constructor(
     private offerRouter: OfferRouter,
     private inhabitantRouter: InhabitantRouter,
+    private bankAccountRouter: GovermentBankAccountRouter,
     private swaggerRouter: SwaggerRouter
   ) {
     this._app = express();
@@ -44,8 +46,9 @@ export class App {
   }
 
   private _initRoutes() {
-    this._app.use("/api/inhabitant", this.inhabitantRouter.router);
-    this._app.use("/api/offer", this.offerRouter.router);
     this._app.use("/api/docs", this.swaggerRouter.router);
+    this._app.use("/api/offer", this.offerRouter.router);
+    this._app.use("/api/inhabitant", this.inhabitantRouter.router);
+    this._app.use("/api/govermentBankAccount", this.bankAccountRouter.router);
   }
 }
