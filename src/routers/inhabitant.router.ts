@@ -13,6 +13,7 @@ export class InhabitantRouter {
 
   private init(): void {
     this._router.post("/", this.inhabitantController.create);
+    this._router.get("/:inhabitantId", this.inhabitantController.get);
     this._router.post("/:inhabitantId/offers", this.inhabitantController.placeOffer);
     this._router.post("/:inhabitantId/offers/:offerId/accept", this.inhabitantController.acceptOffer);
   }

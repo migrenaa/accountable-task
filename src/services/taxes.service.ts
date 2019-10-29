@@ -18,6 +18,8 @@ export class TaxesService {
 
         const buyerTaxes = await this.calculateBuyTax(buyer, offer);
         const sellerTaxes = await this.calculateSellTax(seller, offer);
+
+        this.logger.info(`Buyer taxes: ${buyerTaxes} and seller taxes: ${sellerTaxes}`);
         buyer.balance = Big(buyer.balance).minus(buyerTaxes).toString();
 
         this.logger.info(`Updating buyer ${buyer.id} balance with ${buyer.balance}`);
@@ -35,48 +37,52 @@ export class TaxesService {
     }
 
     private async calculateSellTax(seller: Inhabitant, offer: Offer): Promise<string> {
-        const taxCalculation = this.getSellTax(offer.productType) - seller.products.bikes * 5
-        const tax = taxCalculation > 0 ? taxCalculation : 0;
-        return Big(offer.amount).mul(tax).div(100).toString();
+        const bikesTaxDiscount = Big(seller.products.bikes).mul(0.05);
+        const taxCalculation = Big(this.getSellTax(offer.productType)).minus(bikesTaxDiscount);
+        const tax = taxCalculation.gt(0) ? taxCalculation.toString() : "0";
+        return Big(offer.price).mul(tax).toString();
     }
 
     private async calculateBuyTax(buyer: Inhabitant, offer: Offer): Promise<string> {
 
-        let taxPercent;
+        let taxPercent: string;
         taxPercent = this.getBuyTax(offer.productType);
         if (offer.productType === ProductType.Books) {
-            const taxForHavingCoal = buyer.products.coal * 5;
-            taxPercent = taxForHavingCoal < 50 ? taxForHavingCoal : 50;
+            const taxForHavingCoal = Big(buyer.products.coal).mul(0.05);
+            taxPercent = taxForHavingCoal.lt(0.5) ? taxForHavingCoal.toString() : "0.5";
         }
-        return Big(offer.amount).mul(taxPercent).div(100).toString();
+
+        const tax = Big(offer.price).mul(taxPercent).toString();
+        this.logger.info(`buy tax for offer ${offer}`);
+        return tax;
     }
 
-    private getBuyTax(productType: ProductType): number {
+    private getBuyTax(productType: ProductType): string {
 
-        this.logger.info(`Getting tax for buying ${ProductType}`);
+        this.logger.info(`Getting tax for buying ${productType}`);
         switch (productType) {
             case ProductType.Coal:
-                return 75;
+                return "0.75";
             case ProductType.Cheese:
             case ProductType.Bikes:
-                return 15;
+                return "0.15";
             case ProductType.Books:
-                return 0;
+                return "0";
             default:
                 throw Error("Invalid ProductType.");
         }
     }
 
-    private getSellTax(productType: ProductType): number {
+    private getSellTax(productType: ProductType): string {
 
-        this.logger.info(`Getting tax for selling ${ProductType}`);
+        this.logger.info(`Getting tax for selling ${productType}`);
         switch (productType) {
             case ProductType.Coal:
-                return 15;
+                return "0.15";
             case ProductType.Cheese:
             case ProductType.Bikes:
             case ProductType.Books:
-                return 5;
+                return "0.05";
             default:
                 throw Error("Invalid ProductType.");
         }

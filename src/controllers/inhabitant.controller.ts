@@ -56,10 +56,47 @@ export class InhabitantController {
 
   /**
    * @swagger
+   * /inhabitant/{inhabitantId}:
+   *  get:
+   *      description: Get inhabitant by id
+   *      parameters:
+   *          - in: path
+   *            name: inhabitantId
+   *            type: string
+   *            required: true
+   *      tags:
+   *          - Inhabitant
+   *      produces:
+   *          - application/json
+   *      responses:
+   *          200:
+   *              description: OK
+   *          500:
+   *              description: Server error
+   */
+  public get = async (req: Request, res: Response) => {
+    const inhabitantId = req.params.inhabitantId;
+
+    try {
+      const inhabitant = await this.inhabitantStorage.getByID(inhabitantId);
+      return res.status(200).send(inhabitant);
+    } catch (err) {
+      this.loggerService.error(err);
+      res.status(500).send({ error: "Something went wrong, please try again later." });
+    }
+  }
+
+
+  /**
+   * @swagger
    * /inhabitant/{inhabitantId}/offers:
    *  post:
    *      description: Inhabintant places an offer
    *      parameters:
+   *          - in: path
+   *            name: inhabitantId
+   *            type: string
+   *            required: true
    *          - name: Offer
    *            type: Offer
    *            in: body
@@ -84,11 +121,13 @@ export class InhabitantController {
       return res.status(400).send({ error: "Invalid payload!" });
     }
 
+    offer.inhabitantId = req.params.inhabitantId;
+
     try {
       const response = await this.offerService.placeOffer(offer);
       return res
         .status(getResponseStatus(response.status))
-        .send({ message: "Offer placed" });
+        .send(response);
     } catch (err) {
       this.loggerService.error(err);
       res.status(500).send({ error: "Something went wrong, please try again later." });

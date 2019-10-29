@@ -2,7 +2,6 @@ import { OfferSchema } from "../schemas";
 import { LoggerService } from "../services";
 import { Offer } from "../models";
 import { injectable } from "inversify";
-import { v4 as uuid } from "uuid";
 
 
 @injectable()
@@ -50,7 +49,6 @@ export class OfferStorage {
 
     try {
       const tmpres = await OfferSchema.find({isOpen: true}).exec();
-      console.log(tmpres);
       result = Promise.resolve(tmpres);
     } catch (error) {
       const errorMsg = `Error: ${error}`;
