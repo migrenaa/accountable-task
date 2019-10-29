@@ -4,7 +4,7 @@ import { expect } from "chai";
 import "mocha";
 import { ValidationService, LoggerService, OfferService, TaxesService } from "../src/services";
 import { OfferStorage, InhabitantStorage, TransactionStorage } from "../src/storages";
-import { Offer, ProductType, Transaction, Inhabitant, ResponseModel } from "../src/models";
+import { Offer, ProductType, Transaction, Inhabitant, ResponseModel, Status } from "../src/models";
 import { v4 as uuid } from "uuid";
 import { Times } from "typemoq";
 
@@ -63,7 +63,7 @@ describe("OfferService", async () => {
                 .returns(() => Promise.resolve(offer as Offer));
 
             const result = await offerService.trade(buyerId, offerId);
-            expect(result.status, 400);
+            expect(result.status, Status.InvalidSeller);
             expect(result.message, "The inhabitant can't accept it's own offers.");
         });
 
@@ -100,7 +100,7 @@ describe("OfferService", async () => {
 
             taxesSerivce.verify(x => x.applyTaxes(seller, buyer, offer), Times.never());
             offerStorage.verify(x => x.closeOffer(offer), Times.never());
-            expect(result.status, 400);
+            expect(result.status, Status.InvalidSeller);
         });
 
         it("Shouldn't apply taxes and close the offer if the validation of the buyer fails.", async () => {
@@ -132,7 +132,7 @@ describe("OfferService", async () => {
 
             taxesSerivce.verify(x => x.applyTaxes(seller, buyer, offer), Times.never());
             offerStorage.verify(x => x.closeOffer(offer), Times.never());
-            expect(result.status, 400);
+            expect(result.status, Status.InvalidBuyer);
         });
 
         // it("Should apply taxes and close the offer if the validations pass.", async () => {

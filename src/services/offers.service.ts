@@ -1,4 +1,4 @@
-import { ResponseModel, Offer, Inhabitant, Transaction } from "../models";
+import { ResponseModel, Offer, Inhabitant, Transaction, Status } from "../models";
 import { injectable } from "inversify";
 import { LoggerService } from "./logger.service";
 import { ValidationService } from "./validation.service";
@@ -25,7 +25,7 @@ export class OfferService {
 
         if (inhabitantId === offer.inhabitantId) {
             return {
-                status: 400,
+                status: Status.InvalidBuyer,
                 message: "The inhabitant can't accept it's own offers."
             }
         }
@@ -43,12 +43,12 @@ export class OfferService {
 
         this.logger.info(`Validating buyer ${buyerId} for offer ${offer.id}`);
         const buyerValidation = await this.validationService.validateBuy(buyer, offer);
-        if (buyerValidation.status !== 200) {
+        if (buyerValidation.status !== Status.Success) {
             return buyerValidation;
         }
         this.logger.info(`Validating seller ${sellerId} for offer ${offer.id}`);
         const sellerValidation = await this.validationService.validateSell(seller, offer);
-        if (sellerValidation.status !== 200) {
+        if (sellerValidation.status !== Status.Success) {
             return sellerValidation;
         }
 
@@ -57,7 +57,7 @@ export class OfferService {
         await this.offerStorage.closeOffer(offer);
         await this.storeTransaction(seller, buyer, offer);
         return {
-            status: 200,
+            status: Status.Success,
             message: "The trade passed successfully."
         }
     }
@@ -67,12 +67,12 @@ export class OfferService {
         const validationResult = OfferType.Buy
             ? await this.validationService.validateBuy(inhabitant, offer)
             : await this.validationService.validateSell(inhabitant, offer);
-        if (validationResult.status !== 200) {
+        if (validationResult.status !== Status.Success) {
             return validationResult;
         }
         const created = await this.offerStorage.create(offer);
         return {
-            status: 200,
+            status: Status.Success,
             message: "Offer placed",
             object: {
                 id: created.id
