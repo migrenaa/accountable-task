@@ -85,7 +85,7 @@ export class OfferService {
     private async exchangeProducts(seller: Inhabitant, buyer: Inhabitant, offer: Offer): Promise<void> {
 
         this.logger.info(`[exchangeProducts] Executing offer ${offer.id}`);
-        seller.products[offer.productType] = Number(seller.products[offer.productType]) + Number(offer.amount);
+        seller.products[offer.productType] = Number(seller.products[offer.productType]) - Number(offer.amount);
         seller.balance = Big(seller.balance).plus(offer.price).toString();
 
         buyer.products[offer.productType] = Number(buyer.products[offer.productType]) + Number(offer.amount);
