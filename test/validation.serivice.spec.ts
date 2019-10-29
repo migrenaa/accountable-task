@@ -4,7 +4,7 @@ import { expect } from "chai";
 import "mocha";
 import { ValidationService, LoggerService } from "../src/services";
 import { TransactionStorage } from "../src/storages";
-import { Inhabitant, Offer, ProductType, OfferType, Transaction } from "../src/models";
+import { Inhabitant, Offer, ProductType, OfferType, Transaction, Status } from "../src/models";
 import { v4 as uuid } from "uuid";
 
 
@@ -67,7 +67,7 @@ describe("ValidationService", async () => {
             };
 
             const result = await validationSerivce.validateSell(seller, offer)
-            expect(result.status, 400);
+            expect(result.status, Status.InvalidSeller);
             expect(result.message, "The wants to sell more than it has from this products.");
 
         });
@@ -102,7 +102,7 @@ describe("ValidationService", async () => {
                 .returns(() => Promise.resolve([transaction, transaction, transaction]));
 
             const result = await validationSerivce.validateSell(seller, offer)
-            expect(result.status, 400);
+            expect(result.status, Status.InvalidSeller);
             expect(result.message, "The seller can't place an offer for book 3 times in a row.");
 
         });
@@ -137,7 +137,7 @@ describe("ValidationService", async () => {
                 .returns(() => Promise.resolve([transaction]));
 
             const result = await validationSerivce.validateSell(seller, offer)
-            expect(result.status, 200);
+            expect(result.status, Status.Success);
             expect(result.message, "Offer can be placed.");
         });
     });
@@ -170,7 +170,7 @@ describe("ValidationService", async () => {
             };
 
             const result = await validationSerivce.validateBuy(buyer, offer)
-            expect(result.status, 400);
+            expect(result.status, Status.InvalidBuyer);
             expect(result.message, "The buyer doesn't have enough money.");
 
         });
@@ -199,7 +199,7 @@ describe("ValidationService", async () => {
             };
 
             const result = await validationSerivce.validateBuy(buyer, offer)
-            expect(result.status, 400);
+            expect(result.status, Status.InvalidBuyer);
             expect(result.message, "The buyer can't buy a third bike.");
 
         });
@@ -231,7 +231,7 @@ describe("ValidationService", async () => {
             process.env.GLOBAL_COAL_MARKET = "10";
 
             const result = await validationSerivce.validateBuy(buyer, offer)
-            expect(result.status, 400);
+            expect(result.status, Status.InvalidBuyer);
             expect(result.message, "The buyer can't own more than 10 percent of the global coal market.");
 
         });
@@ -269,7 +269,7 @@ describe("ValidationService", async () => {
                 .returns(() => Promise.resolve([transaction, transaction]));
 
             const result = await validationSerivce.validateBuy(buyer, offer)
-            expect(result.status, 400);
+            expect(result.status, Status.InvalidBuyer);
             expect(result.message, "The buyer can't place an offer for a bike 2 times in a row.");
 
         });
@@ -305,7 +305,7 @@ describe("ValidationService", async () => {
                 .returns(() => Promise.resolve([transaction]));
 
             const result = await validationSerivce.validateBuy(buyer, offer)
-            expect(result.status, 200);
+            expect(result.status, Status.Success);
             expect(result.message, "Offer can be placed.");
         });
     });

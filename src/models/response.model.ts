@@ -1,6 +1,7 @@
+import { Status } from "./status";
 
 export class ResponseModel {
-    status: number;
+    status: Status;
     message: string;
     object?: any;
 };
