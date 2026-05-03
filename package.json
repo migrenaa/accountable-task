@@ -32,7 +32,7 @@
     "swagger-ui-express": "^3.0.10",
     "winston": "^3.2.1",
     "mongoose": ">=5.7.5",
-    "uuid": "3.3.3"
+    "uuid": "14.0.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.0",
